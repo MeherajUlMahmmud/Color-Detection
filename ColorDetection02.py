@@ -2,41 +2,44 @@ import numpy as np
 import cv2
 import urllib.request
 
-# URL = "http://192.168.0.101:8080/shot.jpg"
-video = cv2.VideoCapture(0)
+URL = "http://192.168.0.105:8080/shot.jpg" # ip address of IP Webcam (Android)
+video = cv2.VideoCapture(0) # capture video
 
 while True:
-    # imgResp = urllib.request.urlopen(URL)
-    # imgNp = np.array(bytearray(imgResp.read()), dtype=np.uint8)
+    # Needed to capture from the mobile phone
+    # imgResp = urllib.request.urlopen(URL) # open image from URL
+    # imgNp = np.array(bytearray(imgResp.read()), dtype=np.uint8) # convert image to numpy array
+    # img = cv2.imdecode(imgNp, -1) # convert image to color
 
-    # img = cv2.imdecode(imgNp, -1)
+    # Needed to capture from the computer's camera
     ret, img = video.read()
-    img = cv2.flip(img, 1)
-    img = cv2.resize(img, (640, 480))
 
-    hsv_frame = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    img = cv2.flip(img, 1) # flip image horizontally
+    img = cv2.resize(img, (640, 480)) # resize image
+
+    hsv_frame = cv2.cvtColor(img, cv2.COLOR_BGR2HSV) # convert image to HSV
 
     # define range of blue color in HSV
-    lower_blue = np.array([90, 60, 0])
-    upper_blue = np.array([121, 255, 255])
+    lower_blue = np.array([90, 60, 0]) # lower range of blue
+    upper_blue = np.array([121, 255, 255]) # upper range of blue
     # Threshold the HSV image to get only blue colors
     blue_mask = cv2.inRange(hsv_frame, lower_blue, upper_blue)
 
     # define range for red color in HSV
-    lower_red = np.array([0, 50, 120])
-    upper_red = np.array([10, 255, 255])
+    lower_red = np.array([0, 50, 120]) # lower range of red
+    upper_red = np.array([10, 255, 255]) # upper range of red
     # Threshold the HSV image to get only blue colors
     red_mask = cv2.inRange(hsv_frame, lower_red, upper_red)
 
     # define range for green color in HSV
-    lower_green = np.array([40, 70, 80])
-    upper_green = np.array([70, 255, 255])
+    lower_green = np.array([40, 70, 80]) # lower range of green
+    upper_green = np.array([70, 255, 255]) # upper range of green
     # Threshold the HSV image to get only blue colors
     green_mask = cv2.inRange(hsv_frame, lower_green, upper_green)
 
     # define range for yellow color in HSV
-    lower_yellow = np.array([25, 70, 120])
-    upper_yellow = np.array([30, 255, 255])
+    lower_yellow = np.array([25, 70, 120]) # lower range of yellow
+    upper_yellow = np.array([30, 255, 255]) # upper range of yellow
     # Threshold the HSV image to get only blue colors
     yellow_mask = cv2.inRange(hsv_frame, lower_yellow, upper_yellow)
 
@@ -86,8 +89,8 @@ while True:
     kernel = np.ones((5, 5), "uint8")
 
     # for red color
-    red_mask = cv2.dilate(red_mask, kernel)
-    res_red = cv2.bitwise_and(img, img, mask=red_mask)
+    red_mask = cv2.dilate(red_mask, kernel) # dilate red mask
+    res_red = cv2.bitwise_and(img, img, mask=red_mask) # bitwise and operator between image and red mask
 
     # for blue color
     blue_mask = cv2.dilate(blue_mask, kernel)
@@ -131,14 +134,14 @@ while True:
 
     MAX_AREA = 500
     # creating a contour to track red color
-    red_contours, red_hierarchy = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    red_contours, red_hierarchy = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) # find contours in the red mask
 
-    for pic, contour in enumerate(red_contours):
-        area = cv2.contourArea(contour)
-        if (area > MAX_AREA):
-            x, y, w, h = cv2.boundingRect(contour)
-            img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
-            cv2.putText(img, "RED", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255))
+    for pic, contour in enumerate(red_contours): # iterate through all the contours
+        area = cv2.contourArea(contour) # find the area of contour
+        if (area > MAX_AREA): # if the area of contour is greater than MAX_AREA
+            x, y, w, h = cv2.boundingRect(contour) # find the bounding rectangle
+            img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2) # draw a rectangle around the contour
+            cv2.putText(img, "RED", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255)) # put text in the image
 
     # creating a contour to track blue color
     blue_contours, blue_hierarchy = cv2.findContours(blue_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
